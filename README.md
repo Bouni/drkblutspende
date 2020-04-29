@@ -8,7 +8,7 @@ DRK Blutspende allows you to get upcoming dates for blood donation into Home Ass
 
 The data is fetched from https://www.spenderservice.net/
 
-## ### Installation:
+### Installation:
 
 #### HACS
 
