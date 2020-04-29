@@ -4,7 +4,7 @@ This component has been created to be used with Home Assistant.
 
 DRK Blutspende allows you to get upcoming dates for blood donation into Home Assistant.
 
-## Data source
+### Data source
 
 The data is fetched from https://www.spenderservice.net/
 
