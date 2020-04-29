@@ -1,0 +1,13 @@
+{
+  "domain": "drkblutspende",
+  "name": "DRK Blutspende",
+  "documentation": "",
+  "requirements": [
+    "feedparser",
+    "requests"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "Bouni"
+  ]
+}
