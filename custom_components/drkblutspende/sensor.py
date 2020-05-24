@@ -11,7 +11,7 @@ import requests
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from const import (
+from .const import (
     CONF_COUNTY_ID,
     CONF_LOOKAHEAD,
     CONF_RADIUS,
