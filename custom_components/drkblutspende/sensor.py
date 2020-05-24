@@ -53,12 +53,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up date sensor."""
-    zipcode = config.get(CONF_ZIPCODE)
-    radius = config.get(CONF_RADIUS)
-    countyid = config.get(CONF_COUNTY_ID)
-    lookahead = config.get(CONF_LOOKAHEAD)
-    timeformat = config.get(CONF_TIMEFORMAT)
-    zipfilter = config.get(CONF_ZIPFILTER)
+    zipcode = config.get(CONF_ZIPCODE,"")
+    radius = config.get(CONF_RADIUS,"")
+    countyid = config.get(CONF_COUNTY_ID,"")
+    lookahead = config.get(CONF_LOOKAHEAD,"")
+    timeformat = config.get(CONF_TIMEFORMAT,"")
+    zipfilter = config.get(CONF_ZIPFILTER,"")
 
     devices = []
     devices.append(
@@ -124,6 +124,7 @@ class DRKBlutspendeSensor(Entity):
             feed = feedparser.parse(
                 f"{url}?term={self._zipcode}&radius={self._radius}&county_id={self._countyid}&date_to={date_to}"
             )
+            _LOGGER.debug(f"{url}?term={self._zipcode}&radius={self._radius}&county_id={self._countyid}&date_to={date_to} gave status code {feed.status}")
         except Exception as e:
             _LOGGER.error("Couldn't get data from spenderservice.net")
             return
