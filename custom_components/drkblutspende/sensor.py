@@ -139,6 +139,7 @@ class DRKBlutspendeSensor(Entity):
             d = re.search(
                 r"-\s(?P<address>.*)\s-\s(?P<location>[^<]+)", entry["description"]
             )
+            _LOGGER.debug(data)
             description = d.groupdict()
             if not self._zipfilter:
                 self._state = dt.strptime(
@@ -149,7 +150,7 @@ class DRKBlutspendeSensor(Entity):
                 self._state_attributes["location"] = description["location"]
                 break
             else:
-                if data["zip"] in self._zipfilter:
+                if int(data["zip"]) in self._zipfilter:
                     self._state = dt.strptime(
                         f"{data['date']} {data['start']}", "%d.%m.%Y %H:%M"
                     )
