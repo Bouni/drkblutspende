@@ -1,6 +1,7 @@
 {
   "domain": "drkblutspende",
   "name": "DRK Blutspende",
+  "version": "0.1.4",
   "documentation": "",
   "requirements": [
     "feedparser",
