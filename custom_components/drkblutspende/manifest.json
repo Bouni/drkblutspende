@@ -2,13 +2,13 @@
   "domain": "drkblutspende",
   "name": "DRK Blutspende",
   "version": "0.1.4",
-  "documentation": "",
+  "documentation": "https://github.com/Bouni/drkblutspende",
   "requirements": [
     "feedparser",
     "requests"
   ],
   "dependencies": [],
   "codeowners": [
-    "Bouni"
+    "@bouni"
   ]
 }
