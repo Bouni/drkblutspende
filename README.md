@@ -1,5 +1,7 @@
 # DRK Blutspende
 
+[![Validate with hassfest](https://github.com/Bouni/drkblutspende/actions/workflows/hassfest.yml/badge.svg)](https://github.com/Bouni/drkblutspende/actions/workflows/hassfest.yml)
+
 This component has been created to be used with Home Assistant.
 
 DRK Blutspende allows you to get upcoming dates for blood donation into Home Assistant.
