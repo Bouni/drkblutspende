@@ -2,6 +2,10 @@
 
 [![Validate with hassfest](https://github.com/Bouni/drkblutspende/actions/workflows/hassfest.yml/badge.svg)](https://github.com/Bouni/drkblutspende/actions/workflows/hassfest.yml)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3I364QTM)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/bouni)
+[![Github Sponsors](https://img.shields.io/badge/-Sponsor-fafbfc?style=for-the-badge&logo=GitHub%20Sponsors)](https://github.com/sponsors/Bouni)
+
 This component has been created to be used with Home Assistant.
 
 DRK Blutspende allows you to get upcoming dates for blood donation into Home Assistant.
