@@ -6,7 +6,7 @@
   "documentation": "https://github.com/Bouni/drkblutspende",
   "issue_tracker": "https://github.com/Bouni/drkblutspende/issues",
   "requirements": [
-    "feedparser>=6.0.8",
+    "feedparser>=6.0.8"
   ],
   "dependencies": [],
   "codeowners": [
