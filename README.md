@@ -35,22 +35,22 @@ As this is no official API this component can break at any time if they decide t
 
 ```
 - platform: drkblutspende
-  zipcode: 79790
+  zipcode: "79790"
   radius: 10
   countyid: "08337"
   lookahead: 14
   timeformat: "%A, %d.%m.%Y"
   zipfilter: 
-    - 79790
-    - 79801
+    - "79790"
+    - "79801"
 ```
 
- - `zipcode` is required, this defines the center of the search
+ - `zipcode` is required, this defines the center of the search. Note this must be a string!
  - `radius` is optional, this defines the radius to search within in kilometers
- - `countyid` is optional, limits the results to the selected county (see list below)
+ - `countyid` is optional, limits the results to the selected county (see list below). Note this must be a string!
  - `lookahead` is optional, defines how far into the future the rsults can be
  - `timeformat` is optional, lets you define how the date and time is formated
- - `zipfilter` is optional, a list of zipcodes that allows you to limit the results to the zipcodes in the list
+ - `zipfilter` is optional, a list of zipcodes that allows you to limit the results to the zipcodes in the list. Note this must be a strings!
 
 ### County ID lookup table
 
