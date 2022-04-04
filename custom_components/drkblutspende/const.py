@@ -6,6 +6,7 @@ CONF_COUNTY_ID = "countyid"
 CONF_LOOKAHEAD = "lookahead"
 CONF_TIMEFORMAT = "timeformat"
 CONF_ZIPFILTER = "zipfilter"
+CONF_ZIP_REGEX = r"\d{5}"
 
 RADIUS_OPTIONS = [5, 10, 15, 25, 50, 75]
 COUNTY_OPTIONS = [

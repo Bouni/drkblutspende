@@ -18,6 +18,7 @@ from .const import (
     CONF_TIMEFORMAT,
     CONF_ZIPCODE,
     CONF_ZIPFILTER,
+    CONF_ZIP_REGEX,
     COUNTY_OPTIONS,
     ICON,
     RADIUS_OPTIONS,
@@ -40,12 +41,12 @@ MIN_TIME_BETWEEN_UPDATES = td(seconds=3600)  # minimum one hour between requests
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_ZIPCODE): vol.Coerce(int),
+        vol.Required(CONF_ZIPCODE): vol.Match(CONF_ZIP_REGEX),
         vol.Optional(CONF_RADIUS): vol.All(vol.Coerce(int), vol.In(RADIUS_OPTIONS)),
         vol.Optional(CONF_COUNTY_ID): vol.All(cv.string, vol.In(COUNTY_OPTIONS)),
         vol.Optional(CONF_LOOKAHEAD, default=DEFAULT_LOOKAHEAD): vol.Coerce(int),
         vol.Optional(CONF_TIMEFORMAT, default=DEFAULT_TIMEFORMAT): cv.string,
-        vol.Optional(CONF_ZIPFILTER): vol.All(list, [vol.Coerce(int)]),
+        vol.Optional(CONF_ZIPFILTER): vol.All(list, [vol.Match(CONF_ZIP_REGEX)]),
     }
 )
 
@@ -96,6 +97,7 @@ class DRKBlutspendeSensor(Entity):
         self.entity_id = async_generate_entity_id(
             ENTITY_ID_FORMAT, "blutspende", hass=hass
         )
+        _LOGGER.debug("Setup DRKBlutspendeSensor")
 
     @property
     def name(self):
@@ -150,7 +152,7 @@ class DRKBlutspendeSensor(Entity):
                 self._state_attributes["location"] = description["location"]
                 break
             else:
-                if int(data["zip"]) in self._zipfilter:
+                if data["zip"] in self._zipfilter:
                     self._state = dt.strptime(
                         f"{data['date']} {data['start']}", "%d.%m.%Y %H:%M"
                     )
