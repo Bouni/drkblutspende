@@ -34,8 +34,6 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "drkblutspende"
 
 DEFAULT_TIMEFORMAT = "%A, %d.%m.%Y"
-DEFAULT_LOOKAHEAD = 14
-
 
 MIN_TIME_BETWEEN_UPDATES = td(seconds=3600)  # minimum one hour between requests
 
@@ -44,7 +42,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_ZIPCODE): vol.Match(CONF_ZIP_REGEX),
         vol.Optional(CONF_RADIUS): vol.All(vol.Coerce(int), vol.In(RADIUS_OPTIONS)),
         vol.Optional(CONF_COUNTY_ID): vol.All(cv.string, vol.In(COUNTY_OPTIONS)),
-        vol.Optional(CONF_LOOKAHEAD, default=DEFAULT_LOOKAHEAD): vol.Coerce(int),
+        vol.Optional(CONF_LOOKAHEAD): vol.Coerce(int),
         vol.Optional(CONF_TIMEFORMAT, default=DEFAULT_TIMEFORMAT): cv.string,
         vol.Optional(CONF_ZIPFILTER): vol.All(list, [vol.Match(CONF_ZIP_REGEX)]),
     }
@@ -54,17 +52,23 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 @asyncio.coroutine
 def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up date sensor."""
-    zipcode = config.get(CONF_ZIPCODE,"")
-    radius = config.get(CONF_RADIUS,"")
-    countyid = config.get(CONF_COUNTY_ID,"")
-    lookahead = config.get(CONF_LOOKAHEAD,"")
-    timeformat = config.get(CONF_TIMEFORMAT,"")
-    zipfilter = config.get(CONF_ZIPFILTER,"")
+    zipcode = config.get(CONF_ZIPCODE, "")
+    radius = config.get(CONF_RADIUS, "")
+    countyid = config.get(CONF_COUNTY_ID, "")
+    lookahead = config.get(CONF_LOOKAHEAD, "")
+    timeformat = config.get(CONF_TIMEFORMAT, "")
+    zipfilter = config.get(CONF_ZIPFILTER, "")
 
     devices = []
     devices.append(
         DRKBlutspendeSensor(
-            hass, zipcode, radius, countyid, lookahead, timeformat, zipfilter,
+            hass,
+            zipcode,
+            radius,
+            countyid,
+            lookahead,
+            timeformat,
+            zipfilter,
         )
     )
     async_add_devices(devices)
@@ -119,16 +123,29 @@ class DRKBlutspendeSensor(Entity):
         """Return the icon to use in the frontend."""
         return ICON
 
+    def build_url(self):
+        """Build query URL depending on configuration"""
+        _LOGGER.debug(f"Zipcode is {self._zipcode}")
+        url = f"https://www.spenderservice.net/termine.rss?term={self._zipcode}"
+        if self._radius:
+            _LOGGER.debug(f"Radius is {self._radius}")
+            url += f"&radius={self._radius}"
+        if self._countyid:
+            _LOGGER.debug(f"County ID is {self._countyid}")
+            url += f"&county_id={self._countyid}"
+        if self._lookahead:
+            _LOGGER.debug(f"Lookahead is {self._lookahead}")
+            date_to = (dt.now() + td(days=self._lookahead)).strftime("%d.%m.%Y")
+            url += f"&date_to={date_to}"
+        return url
+
     def get_data(self):
-        date_to = (dt.now() + td(days=self._lookahead)).strftime("%d.%m.%Y")
-        url = "https://www.spenderservice.net/termine.rss"
+        url = self.build_url()
         try:
-            feed = feedparser.parse(
-                f"{url}?term={self._zipcode}&radius={self._radius}&county_id={self._countyid}&date_to={date_to}"
-            )
-            _LOGGER.debug(f"{url}?term={self._zipcode}&radius={self._radius}&county_id={self._countyid}&date_to={date_to} gave status code {feed.status}")
+            feed = feedparser.parse(url)
+            _LOGGER.debug(f"{url} gave status code {feed.status}")
         except Exception as e:
-            _LOGGER.error("Couldn't get data from spenderservice.net")
+            _LOGGER.error(f"Couldn't get data from spenderservice.net: {e}")
             return
 
         self._state = "unknown"
@@ -141,7 +158,6 @@ class DRKBlutspendeSensor(Entity):
             d = re.search(
                 r"-\s(?P<address>.*)\s-\s(?P<location>[^<]+)", entry["description"]
             )
-            _LOGGER.debug(data)
             description = d.groupdict()
             if not self._zipfilter:
                 self._state = dt.strptime(
@@ -152,7 +168,11 @@ class DRKBlutspendeSensor(Entity):
                 self._state_attributes["location"] = description["location"]
                 break
             else:
+                _LOGGER.debug(
+                    f"search for {data['zip']} in zip filter {self._zipfilter}"
+                )
                 if data["zip"] in self._zipfilter:
+                    _LOGGER.debug(f"{data['zip']} matches zip filter {self._zipfilter}")
                     self._state = dt.strptime(
                         f"{data['date']} {data['start']}", "%d.%m.%Y %H:%M"
                     )
