@@ -166,6 +166,7 @@ class DRKBlutspendeSensor(Entity):
                 self._state_attributes = data
                 self._state_attributes["address"] = description["address"]
                 self._state_attributes["location"] = description["location"]
+                self._state_attributes["link"] = entry["link"]
                 break
             else:
                 _LOGGER.debug(
@@ -179,6 +180,7 @@ class DRKBlutspendeSensor(Entity):
                     self._state_attributes = data
                     self._state_attributes["address"] = description["address"]
                     self._state_attributes["location"] = description["location"]
+                    self._state_attributes["link"] = entry["link"]
                     break
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
