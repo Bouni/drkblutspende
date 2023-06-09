@@ -49,8 +49,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-@asyncio.coroutine
-def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up date sensor."""
     zipcode = config.get(CONF_ZIPCODE, "")
     radius = config.get(CONF_RADIUS, "")
