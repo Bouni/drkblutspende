@@ -2,32 +2,30 @@
 import asyncio
 import logging
 import re
-import xml.etree.ElementTree as et
 from datetime import datetime as dt
 from datetime import timedelta as td
 
 import feedparser
-import requests
-
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from .const import (
-    CONF_COUNTY_ID,
-    CONF_LOOKAHEAD,
-    CONF_RADIUS,
-    CONF_TIMEFORMAT,
-    CONF_ZIPCODE,
-    CONF_ZIPFILTER,
-    CONF_ZIP_REGEX,
-    COUNTY_OPTIONS,
-    ICON,
-    RADIUS_OPTIONS,
-)
 from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.entity import Entity, async_generate_entity_id
 from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.util import Throttle
+
+from .const import (
+    CONF_COUNTY_ID,
+    CONF_LOOKAHEAD,
+    CONF_RADIUS,
+    CONF_TIMEFORMAT,
+    CONF_ZIP_REGEX,
+    CONF_ZIPCODE,
+    CONF_ZIPFILTER,
+    COUNTY_OPTIONS,
+    ICON,
+    RADIUS_OPTIONS,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
