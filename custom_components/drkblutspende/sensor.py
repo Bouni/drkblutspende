@@ -9,7 +9,7 @@ import feedparser
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, CONF_UNIQUE_ID
 from homeassistant.helpers.entity import Entity, async_generate_entity_id
 from homeassistant.helpers.typing import HomeAssistantType
 from homeassistant.util import Throttle
@@ -38,6 +38,7 @@ MIN_TIME_BETWEEN_UPDATES = td(seconds=3600)  # minimum one hour between requests
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_ZIPCODE): vol.Match(CONF_ZIP_REGEX),
+        vol.Optional(CONF_UNIQUE_ID): cv.string,
         vol.Optional(CONF_RADIUS): vol.All(vol.Coerce(int), vol.In(RADIUS_OPTIONS)),
         vol.Optional(CONF_COUNTY_ID): vol.All(cv.string, vol.In(COUNTY_OPTIONS)),
         vol.Optional(CONF_LOOKAHEAD): vol.Coerce(int),
@@ -49,6 +50,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
     """Set up date sensor."""
+    unique_id = config.get(CONF_UNIQUE_ID, None)
     zipcode = config.get(CONF_ZIPCODE, "")
     radius = config.get(CONF_RADIUS, "")
     countyid = config.get(CONF_COUNTY_ID, "")
@@ -60,6 +62,7 @@ async def async_setup_platform(hass, config, async_add_devices, discovery_info=N
     devices.append(
         DRKBlutspendeSensor(
             hass,
+            unique_id,
             zipcode,
             radius,
             countyid,
@@ -77,6 +80,7 @@ class DRKBlutspendeSensor(Entity):
     def __init__(
         self,
         hass: HomeAssistantType,
+        unique_id,
         zipcode,
         radius,
         countyid,
@@ -88,6 +92,7 @@ class DRKBlutspendeSensor(Entity):
         self._state_attributes = {}
         self._state = None
         self._name = "blutspende"
+        self._unique_id = unique_id
         self._zipcode = zipcode
         self._radius = radius
         self._countyid = countyid
@@ -104,6 +109,11 @@ class DRKBlutspendeSensor(Entity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def unique_id(self):
+        """Return the unique_id of the sensor."""
+        return self._unique_id
 
     @property
     def extra_state_attributes(self):
