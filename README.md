@@ -35,6 +35,7 @@ As this is no official API this component can break at any time if they decide t
 
 ```
 - platform: drkblutspende
+  unique_id: drkblutspende_my_locations
   zipcode: "79790"
   radius: 10
   countyid: "08337"
@@ -51,6 +52,7 @@ As this is no official API this component can break at any time if they decide t
  - `lookahead` is optional, defines how far into the future the rsults can be
  - `timeformat` is optional, lets you define how the date and time is formated
  - `zipfilter` is optional, a list of zipcodes that allows you to limit the results to the zipcodes in the list. Note this must be a strings!
+ - `unique_id` is optional, a unique identifier for Home Assistant. To allow configurating the entity from the UI, this is must be set.
 
 ### County ID lookup table
 
