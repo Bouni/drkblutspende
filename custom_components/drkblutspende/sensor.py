@@ -1,6 +1,5 @@
 """German red cross blood donation sensor."""
 
-import asyncio
 import logging
 import re
 from datetime import datetime as dt
@@ -10,9 +9,9 @@ import feedparser
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME, CONF_UNIQUE_ID
-from homeassistant.helpers.entity import Entity, async_generate_entity_id
+from homeassistant.const import CONF_UNIQUE_ID
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import Entity, async_generate_entity_id
 from homeassistant.util import Throttle
 
 from .const import (
@@ -49,7 +48,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_devices):
     """Set up date sensor."""
     unique_id = config.get(CONF_UNIQUE_ID, None)
     zipcode = config.get(CONF_ZIPCODE, "")
@@ -162,10 +161,14 @@ class DRKBlutspendeSensor(Entity):
                 r"(?P<zip>\d{5})\s(?P<city>.*)\sam\s(?P<date>[\d\.]+),\s(?P<start>[\d\:]+)[^\d]+(?P<end>[\d\:]+)",
                 entry["title"],
             )
+            if not t:
+                continue
             data = t.groupdict()
             d = re.search(
                 r"-\s(?P<address>.*)\s-\s(?P<location>[^<]+)", entry["description"]
             )
+            if not d:
+                continue
             description = d.groupdict()
             if not self._zipfilter:
                 self._state = dt.strptime(
