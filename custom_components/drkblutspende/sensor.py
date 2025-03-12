@@ -1,4 +1,5 @@
-""" German red cross blood donation sensor."""
+"""German red cross blood donation sensor."""
+
 import asyncio
 import logging
 import re
@@ -11,7 +12,7 @@ import voluptuous as vol
 from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
 from homeassistant.const import CONF_NAME, CONF_UNIQUE_ID
 from homeassistant.helpers.entity import Entity, async_generate_entity_id
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.core import HomeAssistant
 from homeassistant.util import Throttle
 
 from .const import (
@@ -79,7 +80,7 @@ class DRKBlutspendeSensor(Entity):
 
     def __init__(
         self,
-        hass: HomeAssistantType,
+        hass: HomeAssistant,
         unique_id,
         zipcode,
         radius,
