@@ -4,8 +4,6 @@ on:
   push:
   pull_request:
   release:
-  schedule:
-    - cron: "0 0 * * *"
 
 jobs:
   validate:
