@@ -123,7 +123,7 @@ class DRKBlutspendeSensor(SensorEntity):
     def filter_by_zipcode(self, data: list[dict]) -> list[dict]:
         """Filter the raw list of entries for configured zipcodes."""
         zipcodes = [zip.strip() for zip in self._zipfilter.split(",")]
-        return [entry for entry in data if entry["zipcode"] in zipcodes]
+        return [entry for entry in data if entry["attributes"]["zipcode"] in zipcodes]
 
     def update_sensor(self, data: dict):
         """Update state and attributes."""
