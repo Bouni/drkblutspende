@@ -11,7 +11,7 @@ from .const import (
     CONF_TIMEFORMAT,
     CONF_ZIPCODE,
     CONF_ZIPFILTER,
-    COUNTIES,
+    COUNTY_OPTIONS,
     DEFAULT_TIMEFORMAT,
     DOMAIN,
     RADIUS_OPTIONS,
@@ -38,7 +38,7 @@ class DRKBlutspendeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_ZIPCODE): str,
                 vol.Optional(CONF_RADIUS, default=10): vol.In(RADIUS_OPTIONS),
-                vol.Optional(CONF_COUNTY_ID): vol.In(COUNTIES),
+                vol.Optional(CONF_COUNTY_ID): vol.In(COUNTY_OPTIONS),
                 vol.Optional(CONF_LOOKAHEAD, default=7): int,
                 vol.Optional(CONF_TIMEFORMAT, default=DEFAULT_TIMEFORMAT): str,
                 vol.Optional(CONF_ZIPFILTER, default=""): str,
