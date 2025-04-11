@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DRK Blutspende konfigurieren",
+        "description": "Bitte geben Sie die folgenden Informationen ein, um die Integration zu konfigurieren.",
+        "data": {
+          "zipcode": "Postleitzahl",
+          "radius": "Radius (km)",
+          "county_id": "Landkreis",
+          "lookahead": "Vorausschau (Tage)",
+          "timeformat": "Zeitformat",
+          "zipfilter": "PLZ-Filter"
+        },
+        "data_description": {
+          "zipcode": "Deine Postleitzahl",
+          "radius": "Der Radius in dem gesucht wird",
+          "countyid": "Der Landkreis in dem gesucht wird",
+          "lookahead": "Wie viele Tage in die Zukunft gesucht wird",
+          "timeformat": "Das Format in dem das Datum formatiert wird",
+          "zipfilter": "Ein Filter für bestimmte Postleitzahlen die eingeschlossen werden sollen, durch Komma getrennt"
+        }
+      }
+    },
+    "error": {
+      "invalid_zipcode": "Ungültige Postleitzahl",
+      "invalid_radius": "Ungültiger Radius",
+      "invalid_county": "Ungültiger Landkreis",
+      "invalid_lookahead": "Ungültige Anzahl an Tagen",
+      "invalid_timeformat": "Ungültiges Zeitformat"
+    },
+    "abort": {
+      "already_configured": "Diese Konfiguration existiert bereits."
+    }
+  },
+  "title": "DRK Blutspende"
+}
+
