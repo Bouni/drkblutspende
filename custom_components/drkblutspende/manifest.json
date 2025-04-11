@@ -4,6 +4,7 @@
   "codeowners": [
     "@bouni"
   ],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/Bouni/drkblutspende",
   "iot_class": "cloud_polling",
@@ -11,5 +12,5 @@
   "requirements": [
     "feedparser>=6.0.8"
   ],
-  "version": "0.1.11"
+  "version": "0.2.0"
 }

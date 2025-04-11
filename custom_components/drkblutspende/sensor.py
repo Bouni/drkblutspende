@@ -1,153 +1,133 @@
-"""German red cross blood donation sensor."""
-
-import asyncio
+import hashlib
 import logging
 import re
 from datetime import datetime as dt
 from datetime import timedelta as td
+from typing import Any, Dict, Optional
 
 import feedparser
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
-from homeassistant.components.sensor import ENTITY_ID_FORMAT, PLATFORM_SCHEMA
-from homeassistant.const import CONF_NAME, CONF_UNIQUE_ID
-from homeassistant.helpers.entity import Entity, async_generate_entity_id
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import async_generate_entity_id
 from homeassistant.util import Throttle
 
-from .const import (
-    CONF_COUNTY_ID,
-    CONF_LOOKAHEAD,
-    CONF_RADIUS,
-    CONF_TIMEFORMAT,
-    CONF_ZIP_REGEX,
-    CONF_ZIPCODE,
-    CONF_ZIPFILTER,
-    COUNTY_OPTIONS,
-    ICON,
-    RADIUS_OPTIONS,
-)
+from .const import ICON, MIN_TIME_BETWEEN_UPDATES
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "drkblutspende"
 
-DEFAULT_TIMEFORMAT = "%A, %d.%m.%Y"
-
-MIN_TIME_BETWEEN_UPDATES = td(seconds=3600)  # minimum one hour between requests
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_ZIPCODE): vol.Match(CONF_ZIP_REGEX),
-        vol.Optional(CONF_UNIQUE_ID): cv.string,
-        vol.Optional(CONF_RADIUS): vol.All(vol.Coerce(int), vol.In(RADIUS_OPTIONS)),
-        vol.Optional(CONF_COUNTY_ID): vol.All(cv.string, vol.In(COUNTY_OPTIONS)),
-        vol.Optional(CONF_LOOKAHEAD): vol.Coerce(int),
-        vol.Optional(CONF_TIMEFORMAT, default=DEFAULT_TIMEFORMAT): cv.string,
-        vol.Optional(CONF_ZIPFILTER): vol.All(list, [vol.Match(CONF_ZIP_REGEX)]),
-    }
-)
+async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
+    """Set up DRK Blutspende sensor based on a config entry."""
+    config = entry.data
+    _LOGGER.debug("Sensor config: %s", config)
+    async_add_entities([DRKBlutspendeSensor(hass, config)], True)
 
 
-async def async_setup_platform(hass, config, async_add_devices, discovery_info=None):
-    """Set up date sensor."""
-    unique_id = config.get(CONF_UNIQUE_ID, None)
-    zipcode = config.get(CONF_ZIPCODE, "")
-    radius = config.get(CONF_RADIUS, "")
-    countyid = config.get(CONF_COUNTY_ID, "")
-    lookahead = config.get(CONF_LOOKAHEAD, "")
-    timeformat = config.get(CONF_TIMEFORMAT, "")
-    zipfilter = config.get(CONF_ZIPFILTER, "")
+class DRKBlutspendeSensor(SensorEntity):
+    """Representation of a DRK Blutspende Sensor."""
 
-    devices = []
-    devices.append(
-        DRKBlutspendeSensor(
-            hass,
-            unique_id,
-            zipcode,
-            radius,
-            countyid,
-            lookahead,
-            timeformat,
-            zipfilter,
-        )
-    )
-    async_add_devices(devices)
-
-
-class DRKBlutspendeSensor(Entity):
-    """Representation of a DRKBlutspende Sensor."""
-
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        unique_id,
-        zipcode,
-        radius,
-        countyid,
-        lookahead,
-        timeformat,
-        zipfilter,
-    ):
+    def __init__(self, hass: HomeAssistant, config: Dict[str, Any]) -> None:
         """Initialize the sensor."""
-        self._state_attributes = {}
-        self._state = None
-        self._name = "blutspende"
-        self._unique_id = unique_id
-        self._zipcode = zipcode
-        self._radius = radius
-        self._countyid = countyid
-        self._lookahead = lookahead
-        self._timeformat = timeformat
-        self._zipfilter = zipfilter
-
-        self.entity_id = async_generate_entity_id(
-            ENTITY_ID_FORMAT, "blutspende", hass=hass
-        )
+        self._state_attributes: Dict[str, Any] = {}
+        self._state: Optional[str] = None
+        self._name: str = "blutspende"
+        self._zipcode: str = config.get("zipcode", "")
+        self._radius: str = config.get("radius", "")
+        self._countyid: str = config.get("countyid", "")
+        self._lookahead: str = config.get("lookahead", "")
+        self._timeformat: str = config.get("timeformat", "")
+        self._zipfilter: str = config.get("zipfilter", "")
+        self.entity_id = async_generate_entity_id("sensor.{}", self._name, hass=hass)
+        self._attr_unique_id: str = self._generate_unique_id(config)
         _LOGGER.debug("Setup DRKBlutspendeSensor")
 
+    def _generate_unique_id(self, config):
+        j = str(config)
+        return hashlib.sha256(j.encode()).hexdigest()[:8]
+
     @property
-    def name(self):
-        """Return the name of the sensor."""
+    def name(self) -> str:
         return self._name
 
     @property
-    def unique_id(self):
-        """Return the unique_id of the sensor."""
-        return self._unique_id
-
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        return self._state_attributes
-
-    @property
-    def state(self):
-        """Return the state of the sensor."""
+    def state(self) -> Optional[str]:
         return self._state
 
     @property
-    def icon(self):
-        """Return the icon to use in the frontend."""
+    def icon(self) -> str:
         return ICON
 
-    def build_url(self):
+    @property
+    def extra_state_attributes(self) -> Dict[str, Any]:
+        return self._state_attributes
+
+    def build_url(self) -> str:
         """Build query URL depending on configuration"""
-        _LOGGER.debug(f"Zipcode is {self._zipcode}")
-        url = f"https://www.spenderservice.net/termine.rss?term={self._zipcode}"
-        if self._radius:
-            _LOGGER.debug(f"Radius is {self._radius}")
-            url += f"&radius={self._radius}"
-        if self._countyid:
-            _LOGGER.debug(f"County ID is {self._countyid}")
-            url += f"&county_id={self._countyid}"
+        date_to = ""
         if self._lookahead:
-            _LOGGER.debug(f"Lookahead is {self._lookahead}")
-            date_to = (dt.now() + td(days=self._lookahead)).strftime("%d.%m.%Y")
-            url += f"&date_to={date_to}"
+            date_to = (dt.now() + td(days=int(self._lookahead))).strftime("%d.%m.%Y")
+        url = f"https://www.spenderservice.net/termine.rss?term={self._zipcode}&radius={self._radius}&county_id={self._countyid}&date_from=&date_to={date_to}&last_donation=&button="
         return url
 
-    def get_data(self):
+    @staticmethod
+    def get_title_data(title: str) -> dict | None:
+        """Get zipcode, city, date, start and end from the title."""
+        match = re.search(
+            r"(?P<zipcode>\d{5})\s(?P<city>.*)\sam\s(?P<date>[\d\.]+),\s(?P<start>[\d\:]+)[^\d]+(?P<end>[\d\:]+)",
+            title,
+        )
+        if match:
+            return match.groupdict()
+        return None
+
+    @staticmethod
+    def get_description_data(description: str) -> dict | None:
+        """Get address and location from the description."""
+        match = re.search(r"-\s(?P<address>.*)\s-\s(?P<location>[^<]+)", description)
+        if match:
+            return match.groupdict()
+        return None
+
+    def sanitize_data(self, feed: list[dict]) -> list[dict]:
+        """Parse data from RSS entries."""
+        data = []
+        for entry in feed:
+            title = self.get_title_data(entry["title"])
+            if title:
+                description = self.get_description_data(entry["description"])
+                if description:
+                    date = dt.strptime(
+                        f"{title['date']} {title['start']}", "%d.%m.%Y %H:%M"
+                    )
+                    title["date"] = date.strftime(self._timeformat)
+                    data.append(
+                        {
+                            "date": date,
+                            "attributes": {
+                                **title,
+                                **description,
+                                "link": entry["link"],
+                            },
+                        }
+                    )
+                else:
+                    _LOGGER.info("No match in description found")
+            else:
+                _LOGGER.info("No match in title found")
+        return sorted(data, key=lambda x: x["date"])
+
+    def filter_by_zipcode(self, data: list[dict]) -> list[dict]:
+        """Filter the raw list of entries for configured zipcodes."""
+        zipcodes = [zip.strip() for zip in self._zipfilter.split(",")]
+        return [entry for entry in data if entry["zipcode"] in zipcodes]
+
+    def update_sensor(self, data: dict):
+        """Update state and attributes."""
+        self._state = data["date"]
+        self._state_attributes = data["attributes"]
+
+    def get_data(self) -> None:
+        """Fetch rss data from spenderservice.net"""
         url = self.build_url()
         try:
             feed = feedparser.parse(url)
@@ -155,43 +135,20 @@ class DRKBlutspendeSensor(Entity):
         except Exception as e:
             _LOGGER.error(f"Couldn't get data from spenderservice.net: {e}")
             return
-
         self._state = "unknown"
-        for entry in feed["entries"]:
-            t = re.search(
-                r"(?P<zip>\d{5})\s(?P<city>.*)\sam\s(?P<date>[\d\.]+),\s(?P<start>[\d\:]+)[^\d]+(?P<end>[\d\:]+)",
-                entry["title"],
-            )
-            data = t.groupdict()
-            d = re.search(
-                r"-\s(?P<address>.*)\s-\s(?P<location>[^<]+)", entry["description"]
-            )
-            description = d.groupdict()
-            if not self._zipfilter:
-                self._state = dt.strptime(
-                    f"{data['date']} {data['start']}", "%d.%m.%Y %H:%M"
-                )
-                self._state_attributes = data
-                self._state_attributes["address"] = description["address"]
-                self._state_attributes["location"] = description["location"]
-                self._state_attributes["link"] = entry["link"]
-                break
+        data = self.sanitize_data(feed["entries"])
+        if self._zipfilter:
+            data = self.filter_by_zipcode(data)
+            if data:
+                self.update_sensor(data[0])
             else:
-                _LOGGER.debug(
-                    f"search for {data['zip']} in zip filter {self._zipfilter}"
-                )
-                if data["zip"] in self._zipfilter:
-                    _LOGGER.debug(f"{data['zip']} matches zip filter {self._zipfilter}")
-                    self._state = dt.strptime(
-                        f"{data['date']} {data['start']}", "%d.%m.%Y %H:%M"
-                    )
-                    self._state_attributes = data
-                    self._state_attributes["address"] = description["address"]
-                    self._state_attributes["location"] = description["location"]
-                    self._state_attributes["link"] = entry["link"]
-                    break
+                _LOGGER.info("No entries match the zipfilter")
+        else:
+            if data:
+                self.update_sensor(data[0])
+            else:
+                _LOGGER.info("No entries found")
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
-    def update(self):
-        """Fetch new state data for the sensor from the ics file url."""
+    def update(self) -> None:
         self.get_data()
