@@ -3,7 +3,7 @@ import logging
 import re
 from datetime import datetime as dt
 from datetime import timedelta as td
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import feedparser
 from homeassistant.components.sensor import SensorEntity
@@ -26,9 +26,9 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
 class DRKBlutspendeSensor(SensorEntity):
     """Representation of a DRK Blutspende Sensor."""
 
-    def __init__(self, hass: HomeAssistant, config: Dict[str, Any]) -> None:
+    def __init__(self, hass: HomeAssistant, config: dict[str, Any]) -> None:
         """Initialize the sensor."""
-        self._state_attributes: Dict[str, Any] = {}
+        self._state_attributes: dict[str, Any] = {}
         self._state: Optional[str] = None
         self._name: str = "blutspende"
         self._zipcode: str = config.get("zipcode", "")
@@ -62,7 +62,7 @@ class DRKBlutspendeSensor(SensorEntity):
         return ICON
 
     @property
-    def extra_state_attributes(self) -> Dict[str, Any]:
+    def extra_state_attributes(self) -> dict[str, Any]:
         return self._state_attributes
 
     def build_url(self) -> str:
