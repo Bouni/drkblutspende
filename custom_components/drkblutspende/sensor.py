@@ -39,11 +39,15 @@ class DRKBlutspendeSensor(SensorEntity):
         self._zipfilter: str = config.get("zipfilter", "")
         self.entity_id = async_generate_entity_id("sensor.{}", self._name, hass=hass)
         self._attr_unique_id: str = self._generate_unique_id(config)
-        _LOGGER.debug("Setup DRKBlutspendeSensor")
+        _LOGGER.debug("Setup DRKBlutspendeSensor %s", self._attr_unique_id)
 
     def _generate_unique_id(self, config):
-        j = str(config)
-        return hashlib.sha256(j.encode()).hexdigest()[:8]
+        cfgstr = (
+            f"{config.get('zipcode', '')}-{config.get('radius', '')}"
+            f"-{config.get('countyid', '')}-{config.get('lookahead', '')}"
+            f"-{config.get('timeformat', '')}-{config.get('zipfilter', '')}"
+        )
+        return hashlib.sha256(cfgstr.encode()).hexdigest()[:8]
 
     @property
     def name(self) -> str:
