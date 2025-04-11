@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure DRK Blutspende",
+        "description": "Please provide the following information to set up the integration.",
+        "data": {
+          "zipcode": "Zipcode",
+          "radius": "Radius (km)",
+          "countyid": "County",
+          "lookahead": "Lookahead (days)",
+          "timeformat": "Time Format",
+          "zipfilter": "ZIP Filter"
+        },
+        "data_description": {
+          "zipcode": "Enter your Zipcode",
+          "radius": "The radius in which you want to search",
+          "countyid": "The county in which you want to search",
+          "lookahead": "How many days in the future you want to search",
+          "timeformat": "The format in which the dates will be formated",
+          "zipfilter": "Filter for zipcodes you want to include, comma seperated"
+        }
+      }
+    },
+    "error": {
+      "invalid_zipcode": "Invalid ZIP code",
+      "invalid_radius": "Invalid radius",
+      "invalid_county": "Invalid county",
+      "invalid_lookahead": "Invalid number of days",
+      "invalid_timeformat": "Invalid time format"
+    },
+    "abort": {
+      "already_configured": "This configuration already exists."
+    }
+  },
+  "title": "DRK Blood Donation"
+}
+
